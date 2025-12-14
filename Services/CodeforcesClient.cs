@@ -3,56 +3,117 @@ using System.Net.Http.Json;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using CFFFusions.Models;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CFFFusions.Services;
 
 public class CodeforcesClient : ICodeforcesClient
 {
     private readonly HttpClient _http;
+    private readonly IMemoryCache _cache;
 
-    public CodeforcesClient(HttpClient http)
+    private static readonly TimeSpan CacheExpirationTime = TimeSpan.FromMinutes(30); // Example cache expiration time
+
+
+    public CodeforcesClient(IMemoryCache cache , HttpClient http)
     {
         _http = http;
         _http.BaseAddress = new Uri("https://codeforces.com/api/");
         _http.Timeout = TimeSpan.FromSeconds(20);
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("CFFFusions/1.0");
+         _cache = cache;
     }
 
     private static string E(string s) => UrlEncoder.Default.Encode(s);
 
+      /// <summary>
+    /// Method to get user details from cache first, then from external service if not found.
+    /// </summary>
+    private async Task<CfUser?> GetUserDetailsFromCacheAsync(string cacheKey)
+    {
+        try
+        {
+            // Check if the user details are in cache
+            if (_cache.TryGetValue<CfUser>(cacheKey, out var cachedUser))
+            {
+                // Log and return the cached user
+                return cachedUser;
+            }
+            return null; // User not found in cache
+        }
+        catch (Exception ex)
+        {
+            // Handle errors related to cache retrieval
+            throw new InvalidOperationException($"Error retrieving user details from cache: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Method to get user details for a single handle.
+    /// </summary>
     public async Task<CfUser> GetUserAsync(string handle, string lang = "en")
     {
         try
         {
+            // Construct the cache key using the handle and language
+            var cacheKey = $"CodeforcesUser_{handle}_{lang}";
+
+            // Attempt to retrieve the user from the cache first
+            var cachedUser = await GetUserDetailsFromCacheAsync(cacheKey);
+
+            if (cachedUser != null)
+            {
+                // If user is found in cache, return the cached user
+                return cachedUser;
+            }
+
+            // If not found in cache, fetch from the external service (Codeforces API)
             var env = await GetEnvelopeAsync<List<CfUser>>(
                 $"user.info?handles={E(handle)}&lang={E(lang)}");
 
-            var user = env.Result?.FirstOrDefault();
-            if (user is null)
+            var user = env.Result?.FirstOrDefault(); // Assume first user for single handle
+
+            if (user == null)
             {
+                // If no user found, throw an exception
                 throw new InvalidOperationException("User not found");
             }
-             Console.WriteLine(JsonSerializer.Serialize(user));
+
+            // Log the user data (optional for debugging)
+            Console.WriteLine(JsonSerializer.Serialize(user));
+
+            // Store the fetched user data in the cache for future use
+            _cache.Set(cacheKey, user, CacheExpirationTime); // Cache the user details
+
+            // Return the user fetched from the external service
             return user;
         }
-        catch (InvalidOperationException) { throw; }
+        catch (InvalidOperationException)
+        {
+            throw; // Rethrow the InvalidOperationException
+        }
         catch (TaskCanceledException)
         {
+            // Timeout error
             throw new InvalidOperationException("Request to Codeforces timed out.");
         }
         catch (HttpRequestException ex)
         {
+            // Network error
             throw new InvalidOperationException($"Network error calling Codeforces: {ex.Message}");
         }
         catch (JsonException)
         {
+            // Unexpected response format from Codeforces
             throw new InvalidOperationException("Unexpected response format from Codeforces.");
         }
         catch (Exception ex)
         {
+            // General unknown error
             throw new InvalidOperationException($"Unknown error getting user '{handle}': {ex.Message}");
         }
     }
+
 
     public async Task<List<CfUser>> GetUsersAsync(string handlesCsv, string lang = "en")
     {

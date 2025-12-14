@@ -9,26 +9,31 @@ builder.Services.AddSwaggerGen(o =>
     o.SwaggerDoc("v1", new OpenApiInfo { Title = "CFFFusions API", Version = "v1" })
 );
 
-// Allow your dev frontend origins
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevFrontend", policy =>
         policy
             .WithOrigins(
                 "http://127.0.0.1:5501",
-                "http://localhost:5501"   // add if you sometimes use localhost
+                "http://localhost:5501",
+                "http://127.0.0.1:5500",
+                "http://localhost:5500"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
-            // add .AllowCredentials() only if you send cookies/Authorization with credentials mode
     );
 });
 
-// builder.Services.AddTransient<CodeforcesThrottleHandler>();
+
+
 builder.Services.AddHttpClient<ICodeforcesClient, CodeforcesClient>();
-    // .AddHttpMessageHandler<CodeforcesThrottleHandler>();
+builder.Services.AddHttpClient<IContestClient, ContestClient>();
+builder.Services.AddMemoryCache();
+
+
 
 var app = builder.Build();
+
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -37,9 +42,11 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-// IMPORTANT: CORS must be before MapControllers
+
 app.UseCors("DevFrontend");
 
+
 app.MapControllers();
+
 
 app.Run();
