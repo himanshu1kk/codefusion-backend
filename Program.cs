@@ -13,15 +13,13 @@ builder.Services.AddSwaggerGen(o =>
     o.SwaggerDoc("v1", new OpenApiInfo { Title = "CFFFusions API", Version = "v1" })
 );
 
-// 🔑 CORS FIX
+// 🔑 CORS (OPEN FOR NOW)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevFrontend", policy =>
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-    );
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod());
 });
 
 builder.Services.AddHttpClient<ICodeforcesClient, CodeforcesClient>();
@@ -30,6 +28,13 @@ builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
+// ✅ IMPORTANT ORDER
+app.UseRouting();
+app.UseCors("DevFrontend");
+
+// ✅ Health endpoint (Railway hits `/`)
+app.MapGet("/", () => "CFFFusions API is running 🚀");
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -37,7 +42,6 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-app.UseCors("DevFrontend");
-
 app.MapControllers();
+
 app.Run();
