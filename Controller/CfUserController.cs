@@ -44,23 +44,63 @@ public class CfController(ICodeforcesClient cf) : ControllerBase
 
 
 
-    [HttpGet("cf/user/{handle}")]
-    public async Task<IActionResult> GetUser(string handle)
+ [HttpGet("cf/user/{handle}")]
+public async Task<IActionResult> GetUser(string handle)
+{
+    // ✅ 1. Handle empty / invalid input early
+    if (string.IsNullOrWhiteSpace(handle))
     {
-        try
+        return BadRequest(new
         {
-            var user = await _cf.GetUserAsync(handle);
-            return Ok(user);
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-        {
-            return NotFound(new { error = "User not found", handle });
-        }
-        catch (Exception ex)
-        {
-            return Problem(detail: ex.Message);
-        }
+            error = "Handle is required",
+            handle = handle
+        });
     }
+
+    try
+    {
+        var user = await _cf.GetUserAsync(handle);
+
+        if (user == null)
+        {
+            return NotFound(new
+            {
+                error = "User not found",
+                handle
+            });
+        }
+
+        return Ok(user);
+    }
+    catch (InvalidOperationException ex)
+        when (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+    {
+        return NotFound(new
+        {
+            error = "User not found",
+            handle
+        });
+    }
+    catch (HttpRequestException)
+    {
+        return NotFound(new
+        {
+            error = "User not found",
+            handle
+        });
+    }
+    catch (Exception ex)
+    {
+       
+        return StatusCode(500, new
+        {
+            error = "Internal server error",
+            message = ex.Message
+        });
+    }
+}
+
+
 
     //-------------------------------------------summary-------------------------------------------
         /// <summary>
