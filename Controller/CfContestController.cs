@@ -1,3 +1,5 @@
+using Cff.Error.Exceptions;
+using Cff.Error.Extensions;
 using CFFFusions.Models;
 using CFFFusions.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -117,10 +119,11 @@ Download
                 Console.WriteLine(JsonSerializer.Serialize(contests));
                 return Ok(contests);
             }
-            catch (Exception ex)
-            {
-                return Problem(detail: ex.Message);
-            }
+                    catch (CffError err)
+        {
+            return err.ToActionResult();
+        }
+
         }
 
         // Get rating changes for a specific contest
@@ -237,10 +240,11 @@ Download
                 var ratingChanges = await _contestClient.GetContestRatingChangesAsync(contestId);
                 return Ok(ratingChanges);
             }
-            catch (Exception ex)
-            {
-                return Problem(detail: ex.Message);
-            }
+          catch (CffError err)
+{
+    return err.ToActionResult();
+}
+
         }
 
         // Get contest standings
@@ -252,10 +256,11 @@ Download
                 var standings = await _contestClient.GetContestStandingsAsync(contestId, from, count);
                 return Ok(standings);
             }
-            catch (Exception ex)
-            {
-                return Problem(detail: ex.Message);
-            }
+           catch (CffError err)
+{
+    return err.ToActionResult();
+}
+
         }
 
         // Get submissions for a contest
@@ -267,10 +272,11 @@ Download
                 var submissions = await _contestClient.GetContestSubmissionsAsync(contestId, from, count);
                 return Ok(submissions);
             }
-            catch (Exception ex)
-            {
-                return Problem(detail: ex.Message);
-            }
+           catch (CffError err)
+{
+    return err.ToActionResult();
+}
+
         }
 
         // Get hacks for a specific contest
@@ -282,10 +288,11 @@ Download
                 var hacks = await _contestClient.GetContestHacksAsync(contestId, asManager);
                 return Ok(hacks);
             }
-            catch (Exception ex)
-            {
-                return Problem(detail: ex.Message);
-            }
+            catch (CffError err)
+{
+    return err.ToActionResult();
+}
+
         }
     }
 }

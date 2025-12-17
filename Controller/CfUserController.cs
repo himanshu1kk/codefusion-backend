@@ -1,3 +1,5 @@
+using Cff.Error.Exceptions;
+using Cff.Error.Extensions;
 using CFFFusions.Models;
 using CFFFusions.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -45,60 +47,18 @@ public class CfController(ICodeforcesClient cf) : ControllerBase
 
 
  [HttpGet("cf/user/{handle}")]
-public async Task<IActionResult> GetUser(string handle)
-{
-    // ✅ 1. Handle empty / invalid input early
-    if (string.IsNullOrWhiteSpace(handle))
+    public async Task<IActionResult> GetUser(string handle)
     {
-        return BadRequest(new
+        try
         {
-            error = "Handle is required",
-            handle = handle
-        });
-    }
-
-    try
-    {
-        var user = await _cf.GetUserAsync(handle);
-
-        if (user == null)
-        {
-            return NotFound(new
-            {
-                error = "User not found",
-                handle
-            });
+            var user = await _cf.GetUserAsync(handle);
+            return Ok(user);
         }
-
-        return Ok(user);
-    }
-    catch (InvalidOperationException ex)
-        when (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-    {
-        return NotFound(new
+        catch (CffError err)
         {
-            error = "User not found",
-            handle
-        });
+            return err.ToActionResult();
+        }
     }
-    catch (HttpRequestException)
-    {
-        return NotFound(new
-        {
-            error = "User not found",
-            handle
-        });
-    }
-    catch (Exception ex)
-    {
-       
-        return StatusCode(500, new
-        {
-            error = "Internal server error",
-            message = ex.Message
-        });
-    }
-}
 
 
 
@@ -123,24 +83,34 @@ public async Task<IActionResult> GetUser(string handle)
 
 
     
-    [HttpGet("cf/user/{handle}/summary")]
+   [HttpGet("cf/user/{handle}/summary")]
     public async Task<IActionResult> GetUserSummary(string handle)
     {
-        var u = await _cf.GetUserAsync(handle);
-        var hist = await _cf.GetUserRatingAsync(handle);
-        var current = hist.Count > 0 ? hist[^1].NewRating : u.Rating;
-
-        var dto = new UserSummaryDto
+        try
         {
-            Handle = u.Handle,
-            Rank = u.Rank,
-            CurrentRating = current,
-            MaxRating = u.MaxRating,
-            Country = u.Country,
-            RegisteredAt = u.RegistrationTimeSeconds,
-            Avatar = u.Avatar
-        };
-        return Ok(dto);
+            var user = await _cf.GetUserAsync(handle);
+            var ratingHistory = await _cf.GetUserRatingAsync(handle);
+
+            var currentRating =
+                ratingHistory.Count > 0 ? ratingHistory[^1].NewRating : user.Rating;
+
+            var dto = new UserSummaryDto
+            {
+                Handle = user.Handle,
+                Rank = user.Rank,
+                CurrentRating = currentRating,
+                MaxRating = user.MaxRating,
+                Country = user.Country,
+                RegisteredAt = user.RegistrationTimeSeconds,
+                Avatar = user.Avatar
+            };
+
+            return Ok(dto);
+        }
+        catch (CffError err)
+        {
+            return err.ToActionResult();
+        }
     }
 
 
@@ -174,10 +144,16 @@ public async Task<IActionResult> GetUser(string handle)
     [HttpGet("cf/user/{handle}/rating")]
     public async Task<IActionResult> GetUserRating(string handle)
     {
-        var rating = await _cf.GetUserRatingAsync(handle);
-        return Ok(rating);
+        try
+        {
+            var rating = await _cf.GetUserRatingAsync(handle);
+            return Ok(rating);
+        }
+        catch (CffError err)
+        {
+            return err.ToActionResult();
+        }
     }
-
 
     //---------------------------------------------------------------------------------------------//
 
@@ -278,7 +254,20 @@ public async Task<IActionResult> GetUser(string handle)
         [FromQuery] int from = 1,
         [FromQuery] int count = 100)
     {
-        var subs = await _cf.GetUserSubmissionsAsync(handle, from, Math.Clamp(count, 1, 1000));
-        return Ok(subs);
+        try
+        {
+            var submissions = await _cf.GetUserSubmissionsAsync(
+                handle,
+                from,
+                Math.Clamp(count, 1, 1000)
+            );
+
+            return Ok(submissions);
+        }
+        catch (CffError err)
+        {
+            return err.ToActionResult();
+        }
     }
 }
+
