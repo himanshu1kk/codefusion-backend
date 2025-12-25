@@ -24,6 +24,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddHttpClient<ICodeforcesClient, CodeforcesClient>();
 builder.Services.AddHttpClient<IContestClient, ContestClient>();
+builder.Services.AddHttpClient<IProblemClient, ProblemClient>();
 builder.Services.AddMemoryCache();
 
 var app = builder.Build();
