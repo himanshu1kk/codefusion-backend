@@ -10,4 +10,5 @@ public interface ICodeforcesClient
 
     Task<List<CfRatingChange>> GetUserRatingAsync(string handle);
     Task<List<CfSubmission>> GetUserSubmissionsAsync(string handle, int from = 1, int count = 100);
+      Task<ProblemSetResponses> GetProblemSetAsync();
 }

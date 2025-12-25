@@ -185,6 +185,16 @@ public class CodeforcesClient : ICodeforcesClient
         }
     }
 
+    public async Task<ProblemSetResponses> GetProblemSetAsync()
+{
+    var env = await GetEnvelopeAsync<ProblemSetResponses>(
+        "problemset.problems"
+    );
+
+    return env.Result ?? new ProblemSetResponses();
+}
+
+
     // ======================= ENVELOPE HANDLER =======================
     private async Task<CfEnvelope<T>> GetEnvelopeAsync<T>(string relativeUrl)
     {
