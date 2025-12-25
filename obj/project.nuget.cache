@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "7vwGpUtqpAs=",
+  "dgSpecHash": "TteugvHEW6s=",
   "success": true,
-  "projectFilePath": "c:\\Users\\kandp\\Desktop\\cff\\cff\\CFFFusions.csproj",
+  "projectFilePath": "C:\\Users\\kandp\\Desktop\\cff\\cff\\CFFFusions.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\kandp\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",
     "C:\\Users\\kandp\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.6\\microsoft.aspnetcore.openapi.8.0.6.nupkg.sha512",

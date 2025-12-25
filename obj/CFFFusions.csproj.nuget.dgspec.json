@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\kandp\\Desktop\\cff\\cff\\CFFFusions.csproj": {}
+    "C:\\Users\\kandp\\Desktop\\cff\\cff\\CFFFusions.csproj": {}
   },
   "projects": {
-    "c:\\Users\\kandp\\Desktop\\cff\\cff\\CFFFusions.csproj": {
+    "C:\\Users\\kandp\\Desktop\\cff\\cff\\CFFFusions.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\kandp\\Desktop\\cff\\cff\\CFFFusions.csproj",
+        "projectUniqueName": "C:\\Users\\kandp\\Desktop\\cff\\cff\\CFFFusions.csproj",
         "projectName": "CFFFusions",
-        "projectPath": "c:\\Users\\kandp\\Desktop\\cff\\cff\\CFFFusions.csproj",
+        "projectPath": "C:\\Users\\kandp\\Desktop\\cff\\cff\\CFFFusions.csproj",
         "packagesPath": "C:\\Users\\kandp\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\kandp\\Desktop\\cff\\cff\\obj\\",
+        "outputPath": "C:\\Users\\kandp\\Desktop\\cff\\cff\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\kandp\\AppData\\Roaming\\NuGet\\NuGet.Config"
