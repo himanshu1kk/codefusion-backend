@@ -32,7 +32,16 @@ builder.Services.Configure<MongoDbSettings>(
 builder.Services.Configure<SmtpSettings>(
     builder.Configuration.GetSection("Smtp"));
 
-builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+// builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.Configure<BrevoSettings>(
+    builder.Configuration.GetSection("BrevoSettings")
+);
+
+builder.Services.AddHttpClient();
+
+// ✅ USE BREVO ONLY
+builder.Services.AddScoped<IEmailService, BrevoEmailService>();
+
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("Jwt"));
 

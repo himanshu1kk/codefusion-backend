@@ -78,6 +78,7 @@ public class RegistrationService : IRegistrationService
             };
 
             _cache.Set(cacheKey, otpEntry, OtpTtl);
+            Console.WriteLine("EVERTINGING FINE UPTO HERE");
 
            
             await _emailService.SendEmailAsync(
