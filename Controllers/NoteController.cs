@@ -47,6 +47,12 @@ public class NotesController : ControllerBase
     public async Task<IActionResult> GetNote(int contestId, string index)
     {
         // var userId = GetUserId();
-        return Ok(await _service.GetNoteAsync("123", contestId, index));
+        
+          var note = await _service.GetNoteAsync("123", contestId, index);
+
+    if (note == null)
+        return NotFound();
+
+    return Ok(note);
     }
 }
