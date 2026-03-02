@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Cff.Error.Exceptions;
 using Cff.Models;
 using CFFFusions.Models;
@@ -33,6 +34,7 @@ public class ProblemMetaService : IProblemMetaService
                 p.ContestId == contestId &&
                 string.Equals(p.Index, index, StringComparison.OrdinalIgnoreCase)
             );
+            Console.WriteLine("the problem is " +JsonSerializer.Serialize( problem));
 
             if (problem == null)
             {

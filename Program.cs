@@ -59,6 +59,17 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IUserService, UserService>();
+// builder.Services.AddSingleton<IMongoClient>(
+//     new MongoClient(builder.Configuration["MongoDB:Connection"]));
+
+builder.Services.AddScoped(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    return client.GetDatabase("codeforces");
+});
+
+builder.Services.AddScoped<INoteRepository, NoteRepository>();
+builder.Services.AddScoped<INotesService, NotesService>();
 
 
 // Existing services
