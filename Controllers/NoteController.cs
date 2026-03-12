@@ -22,7 +22,7 @@ public class NotesController : ControllerBase
         => User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
 
     [HttpPost]
-    public async Task<IActionResult> SaveNote(CreateNoteDto dto)
+    public async Task<IActionResult> SaveNote([FromBody] CreateNoteDto dto)
     {
         try
         {

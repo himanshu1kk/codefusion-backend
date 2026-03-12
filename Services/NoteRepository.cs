@@ -14,22 +14,25 @@ public class NoteRepository : INoteRepository
     }
 
     public async Task UpsertAsync(Note note)
-    {
-        var filter = Builders<Note>.Filter.Where(n =>
-            n.UserId == note.UserId &&
-            n.ContestId == note.ContestId &&
-            n.Index == note.Index);
-            var existing = await _collection.Find(filter).FirstOrDefaultAsync();
-            if (existing != null)  note.Id = existing.Id;
-            
+{
+    var filter = Builders<Note>.Filter.Where(n =>
+        n.UserId == note.UserId &&
+        n.ContestId == note.ContestId &&
+        n.Index == note.Index);
 
-        Console.WriteLine("filter is " + JsonSerializer.Serialize(note));
+    var update = Builders<Note>.Update
+        .Set(n => n.ProblemName, note.ProblemName)
+        .Set(n => n.Tags, note.Tags)
+        .Set(n => n.Rating, note.Rating)
+        .Set(n => n.Notes, note.Notes)
+        .Set(n => n.UpdatedAt, DateTime.UtcNow)
+        .SetOnInsert(n => n.CreatedAt, DateTime.UtcNow);
 
-        await _collection.ReplaceOneAsync(
-            filter,
-            note,
-            new ReplaceOptions { IsUpsert = true });
-    }
+    await _collection.UpdateOneAsync(
+        filter,
+        update,
+        new UpdateOptions { IsUpsert = true });
+}
 
     public async Task<List<Note>> GetUserNotesAsync(string userId)
     {
