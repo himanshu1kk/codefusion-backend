@@ -28,6 +28,12 @@ public class UserService : IUserService
         await _users.InsertOneAsync(user);
         return user;
     }
+    public async Task<User?> GetByIdAsync(string userId)
+{
+    return await _users
+        .Find(u => u.UserId == userId)
+        .FirstOrDefaultAsync();
+}
 
     public async Task SaveAsync(User user)
 {

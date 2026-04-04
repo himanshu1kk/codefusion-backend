@@ -40,6 +40,20 @@ public class RegistrationService : IRegistrationService
                 "Invalid email format"
             );
 
+            CffError.AssertOrThrow(
+    IsValidName(request.Name),
+    CffError.INTERNAL_ERROR,
+    "Name must contain at least 3 letters"
+);
+
+CffError.AssertOrThrow(
+    IsValidPassword(request.Password),
+    CffError.INTERNAL_ERROR,
+    "Password must be at least 8 characters long"
+);
+
+          
+
             var user = await _userService.GetByEmailAsync(request.Email);
 
           
@@ -200,6 +214,19 @@ public class RegistrationService : IRegistrationService
     private static bool IsValidEmail(string email)
         => Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
 
+    private static bool IsValidName(string name)
+{
+    if (string.IsNullOrWhiteSpace(name))
+        return false;
+
+    var trimmed = name.Replace(" ", "");
+    return trimmed.Length >= 3;
+}
+
+private static bool IsValidPassword(string password)
+{
+    return !string.IsNullOrWhiteSpace(password) && password.Length >= 8;
+}
     private static string HashPassword(string password)
     {
         using var sha256 = SHA256.Create();

@@ -47,6 +47,7 @@ builder.Services.Configure<JwtSettings>(
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IProblemMetaService, ProblemMetaService>();
+builder.Services.AddScoped<IHandleVerificationService, HandleVerificationService>();
 
 
 
