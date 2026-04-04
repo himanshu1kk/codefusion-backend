@@ -87,6 +87,9 @@ app.UseCors("DevFrontend");
 
 // Health check
 app.MapGet("/", () => "CFFFusions API is running 🚀");
+app.UseAuthentication();   
+app.UseAuthorization();    
+
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
