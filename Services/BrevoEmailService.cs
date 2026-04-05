@@ -23,7 +23,7 @@ public class BrevoEmailService : IEmailService
     {
         if (string.IsNullOrWhiteSpace(_settings.ApiKey))
             throw new Exception("Brevo API key is missing");
-
+        Console.WriteLine("api key is " + _settings.ApiKey);
         var payload = new
         {
             sender = new
