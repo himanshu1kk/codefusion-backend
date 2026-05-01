@@ -34,6 +34,8 @@ public class HandleVerificationController : ControllerBase
     [HttpPost("start")]
     public async Task<IActionResult> Start([FromQuery] string handle)
     {
+
+        try{
         var userId = GetUserId();
 
         await _service.StartVerificationAsync(userId, handle);
@@ -42,11 +44,18 @@ public class HandleVerificationController : ControllerBase
         {
             message = "OTP sent to your email"
         });
+        }
+         catch (CffError err)
+        {
+            return err.ToActionResult();
+        }
     }
 
     [HttpPost("check")]
     public async Task<IActionResult> Check([FromQuery] string otp)
     {
+
+        try{
         var userId = GetUserId();
 
         var message = await _service.VerifyAsync(userId, otp);
@@ -55,5 +64,10 @@ public class HandleVerificationController : ControllerBase
         {
             message
         });
+        }
+         catch (CffError err)
+        {
+            return err.ToActionResult();
+        }
     }
 }
