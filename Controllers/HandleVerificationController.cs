@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using CFFFusions.Services;
+using Cff.Error.Exceptions;
+using Cff.Error.Extensions;
 
 namespace CFFFusions.Controllers;
 
