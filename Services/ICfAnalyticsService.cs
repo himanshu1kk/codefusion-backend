@@ -11,5 +11,10 @@ public interface ICfAnalyticsService
     Task<SkillGapResponse> GetSkillGapAsync(
         string handle,
         int limit);
+
+    Task<List<RatingDistributionItem>>
+    GetSolvedRatingDistributionAsync(
+        string handle,
+        int limit);
 }
 

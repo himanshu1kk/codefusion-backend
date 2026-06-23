@@ -167,4 +167,76 @@ public class CfAnalyticsService : ICfAnalyticsService
             );
         }
     }
+
+    public async Task<List<RatingDistributionItem>>
+    GetSolvedRatingDistributionAsync(
+        string handle,
+        int limit)
+{
+    try
+    {
+        if (string.IsNullOrWhiteSpace(handle))
+        {
+            throw new CffError(
+                new BaseResponse(
+                    CffError.BAD_REQUEST,
+                    "Handle is required"
+                )
+            );
+        }
+
+        var enriched =
+            await GetEnrichedSubmissionsAsync(
+                handle,
+                limit
+            );
+
+        // Keep only accepted submissions
+        var accepted =
+            enriched.Where(x =>
+                string.Equals(
+                    x.Verdict,
+                    "OK",
+                    StringComparison.OrdinalIgnoreCase
+                )
+            );
+
+        // Unique solved problems
+        var uniqueSolved =
+            accepted
+                .GroupBy(x =>
+                    $"{x.ContestId}-{x.Index}"
+                )
+                .Select(g => g.First())
+                .ToList();
+
+        var result =
+            uniqueSolved
+                .Where(x => x.Rating.HasValue)
+                .GroupBy(x => x.Rating!.Value)
+                .Select(g => new RatingDistributionItem
+                {
+                    Rating = g.Key,
+                    SolvedCount = g.Count()
+                })
+                .OrderBy(x => x.Rating)
+                .ToList();
+
+        return result;
+    }
+    catch (CffError)
+    {
+        throw;
+    }
+    catch (Exception ex)
+    {
+        throw new CffError(
+            new BaseResponse(
+                CffError.INTERNAL_ERROR,
+                "Unexpected error while computing rating distribution"
+            ),
+            ex: ex
+        );
+    }
+}
 }

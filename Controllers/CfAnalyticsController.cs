@@ -40,4 +40,25 @@ public async Task<IActionResult> GetSkillGap(
         return err.ToActionResult();
     }
 }
+
+[HttpGet("user/{handle}/rating-distribution")]
+public async Task<IActionResult> GetRatingDistribution(
+    string handle,
+    [FromQuery] int limit = 500)
+{
+    try
+    {
+        var result =
+            await _analytics
+                .GetSolvedRatingDistributionAsync(
+                    handle,
+                    Math.Clamp(limit, 1, 1000));
+
+        return Ok(result);
+    }
+    catch (CffError err)
+    {
+        return err.ToActionResult();
+    }
+}
 }
