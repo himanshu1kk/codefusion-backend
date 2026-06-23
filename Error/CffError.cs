@@ -17,6 +17,7 @@ public static readonly int OTP_EXPIRED = 4012;
 public static readonly int OTP_ATTEMPTS_EXCEEDED = 4013;
 public static readonly int OTP_NOT_FOUND = 4014;
 public static readonly int OTP_INVALID = 4015;
+public static readonly int UNAUTHORIZED = 4001;
 
     public static readonly Dictionary<int, IActionResult> ErrorMappings = new()
     {

@@ -55,9 +55,15 @@ builder.Services.AddSwaggerGen(o =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevFrontend", policy =>
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(
+                "http://localhost:3000",   
+                "http://localhost:5173",   
+                "http://localhost:8080",   
+                "http://localhost:4200"    
+              )
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials());
 });
 
 
@@ -86,8 +92,8 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,
-        ValidateAudience = false,
+        ValidateIssuer = true,
+        ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings?.Issuer,
@@ -110,6 +116,8 @@ builder.Services.AddScoped<IProblemMetaService, ProblemMetaService>();
 builder.Services.AddScoped<IHandleVerificationService, HandleVerificationService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 
 
 builder.Services.AddSingleton<IMongoClient>(sp =>
@@ -127,6 +135,7 @@ builder.Services.AddScoped(sp =>
 
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
 builder.Services.AddScoped<INotesService, NotesService>();
+builder.Services.AddScoped<IRefreshTokenService,RefreshTokenService>();
 
 
 builder.Services.AddHttpClient<ICodeforcesClient, CodeforcesClient>();

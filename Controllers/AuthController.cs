@@ -1,11 +1,8 @@
-using System.Security.Cryptography;
-using System.Text;
 using CFFFusions.Models;
 using CFFFusions.Services;
-using Microsoft.AspNetCore.Mvc;
 using Cff.Error.Exceptions;
-using Cff.Models;
 using Cff.Error.Extensions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CFFFusions.Controllers;
 
@@ -13,79 +10,80 @@ namespace CFFFusions.Controllers;
 [Route("api/v1/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly IUserService _userService;
-    private readonly IJwtService _jwtService;
+    private readonly IAuthService _authService;
 
     public AuthController(
-        IUserService userService,
-        IJwtService jwtService)
+        IAuthService authService)
     {
-        _userService = userService;
-        _jwtService = jwtService;
+        _authService = authService;
     }
 
-    // ======================= LOGIN =======================
-
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login(
+        [FromBody] LoginRequest request)
     {
         try
         {
-            var user = await _userService.GetByEmailAsync(request.Email);
+            var result =
+                await _authService.LoginAsync(request);
 
-            if (user == null)
-            {
-                throw new CffError(
-                    new BaseResponse(
-                        CffError.USER_NOT_FOUND,
-                        "User not found"
-                    )
-                );
-            }
-
-            if (!user.IsVerified)
-            {
-                throw new CffError(
-                    new BaseResponse(
-                        CffError.BAD_REQUEST,
-                        "Email not verified"
-                    )
-                );
-            }
-
-            var hashedPassword = HashPassword(request.Password);
-
-            if (user.Password != hashedPassword)
-            {
-                throw new CffError(
-                    new BaseResponse(
-                        CffError.BAD_REQUEST,
-                        "Invalid credentials"
-                    )
-                );
-            }
-
-            var token = _jwtService.GenerateToken(user);
+            AppendRefreshCookie(
+                result.RefreshToken,
+                result.RefreshTokenExpiry);
 
             return Ok(new
             {
-                accessToken = token,
-                tokenType = "Bearer"
+                accessToken = result.AccessToken,
+                tokenType = result.TokenType
             });
         }
         catch (CffError err)
-    {
-        return err.ToActionResult();
-    }
+        {
+            return err.ToActionResult();
+        }
     }
 
-    // ======================= HELPERS =======================
-
-    private static string HashPassword(string password)
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh()
     {
-        using var sha256 = SHA256.Create();
-        return Convert.ToBase64String(
-            sha256.ComputeHash(Encoding.UTF8.GetBytes(password))
-        );
+        try
+        {
+            var refreshToken =
+                Request.Cookies["refreshToken"];
+
+            var result =
+                await _authService
+                .RefreshAsync(refreshToken);
+
+            AppendRefreshCookie(
+                result.RefreshToken,
+                result.RefreshTokenExpiry);
+
+            return Ok(new
+            {
+                accessToken = result.AccessToken,
+                tokenType = result.TokenType
+            });
+        }
+        catch (CffError err)
+        {
+            return err.ToActionResult();
+        }
+    }
+
+    private void AppendRefreshCookie(
+        string token,
+        DateTime expiry)
+    {
+        Response.Cookies.Append(
+            "refreshToken",
+            token,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                 SameSite = SameSiteMode.None,
+                Expires = expiry
+            });
     }
 }
